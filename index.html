@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>视频对比演示</title>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
+
+  <style>
+    /* 这里是简单的样式设置 */
+    body {
+      background-color: #f0f2f5; /* 背景颜色 */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: sans-serif;
+    }
+
+    .container {
+      width: 90%;          /* 容器宽度，手机上也能看 */
+      max-width: 800px;    /* 最大宽度，避免在电脑上太大 */
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    /* 强制视频填满滑块容器，防止出现黑边 */
+    video {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover; 
+    }
+    
+    /* 修复滑块聚焦时的边框问题 */
+    img-comparison-slider:focus {
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>算法效果对比 (左:Ref/ 右: Prun 50% )</h2>
+
+  <img-comparison-slider id="my-slider">
+    
+    <video slot="first" id="video1" width="100%" autoplay muted loop playsinline>
+      <source src="left.mp4" type="video/mp4">
+      您的浏览器不支持 video 标签。
+    </video>
+  
+    <video slot="second" id="video2" width="100%" autoplay muted loop playsinline>
+      <source src="right.mp4" type="video/mp4">
+      您的浏览器不支持 video 标签。
+    </video>
+
+    <svg slot="handle" xmlns="http://www.w3.org/2000/svg" width="100" viewBox="-8 -3 16 6">
+      <path stroke="#fff" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="1" fill="#fff" vector-effect="non-scaling-stroke"></path>
+    </svg>
+  </img-comparison-slider>
+
+  <p style="text-align: center; color: #666; font-size: 0.9em; margin-top: 10px;">
+    拖动中间滑块查看对比
+  </p>
+</div>
+
+<script>
+  const v1 = document.getElementById("video1");
+  const v2 = document.getElementById("video2");
+
+  // 当左边视频播放/暂停时，右边同步
+  v1.addEventListener("play", () => v2.play());
+  v1.addEventListener("pause", () => v2.pause());
+  
+  // 核心：防止因为加载速度不同导致的进度不一致
+  // 每当左侧视频时间更新时，检查右侧是否误差超过 0.1秒
+  v1.addEventListener("timeupdate", () => {
+    if (Math.abs(v1.currentTime - v2.currentTime) > 0.1) {
+      v2.currentTime = v1.currentTime;
+    }
+  });
+  
+  // 如果你需要点击视频来 暂停/播放，可以加上这个
+  const slider = document.getElementById('my-slider');
+  slider.addEventListener('click', () => {
+    if (v1.paused) {
+      v1.play();
+      v2.play();
+    } else {
+      v1.pause();
+      v2.pause();
+    }
+  });
+</script>
+
+</body>
+</html>
